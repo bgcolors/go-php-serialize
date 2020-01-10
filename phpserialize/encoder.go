@@ -54,6 +54,10 @@ func encodeValue(buf *bytes.Buffer, value interface{}) (err error) {
 		buf.WriteRune(TYPE_VALUE_SEPARATOR)
 		encodeString(buf, t)
 		buf.WriteRune(VALUES_SEPARATOR)
+	case map[string]interface{}:
+		buf.WriteString("a")
+		buf.WriteRune(TYPE_VALUE_SEPARATOR)
+		err = encodeObjectCore(buf, t)
 	case map[interface{}]interface{}:
 		buf.WriteString("a")
 		buf.WriteRune(TYPE_VALUE_SEPARATOR)
@@ -92,6 +96,24 @@ func encodeArrayCore(buf *bytes.Buffer, arrValue map[interface{}]interface{}) (e
 			if err = encodeValue(buf, k); err != nil {
 				break
 			}
+		}
+		if err = encodeValue(buf, v); err != nil {
+			break
+		}
+	}
+	buf.WriteRune('}')
+	return err
+}
+
+func encodeObjectCore(buf *bytes.Buffer, arrValue map[string]interface{}) (err error) {
+	valLen := strconv.Itoa(len(arrValue))
+	buf.WriteString(valLen)
+	buf.WriteRune(TYPE_VALUE_SEPARATOR)
+
+	buf.WriteRune('{')
+	for k, v := range arrValue {
+		if err = encodeValue(buf, k); err != nil {
+			break
 		}
 		if err = encodeValue(buf, v); err != nil {
 			break
